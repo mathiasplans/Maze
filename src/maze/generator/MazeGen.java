@@ -19,7 +19,7 @@ public class MazeGen extends Canvas implements Runnable {
 		wonderer = new Path();
 	}
 	
-	private static int DIMX=200, DIMY=100;
+	private static int DIMX=75, DIMY=45;
 	private Thread thread;
 	private boolean running = false;
 	private Path wonderer = new Path();
@@ -82,7 +82,7 @@ public class MazeGen extends Canvas implements Runnable {
 		Graphics g = bs.getDrawGraphics();
 		
 		g.setColor(Color.black);
-		g.fillRect(0, 0, DIMX*7, DIMY*7);
+		g.fillRect(0, 0, DIMX*60, DIMY*60);
 		
 		mazeRunner.paintsAPic(g);
 		

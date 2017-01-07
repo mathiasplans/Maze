@@ -30,8 +30,8 @@ public class Runner {
 	public Runner(int x, int y, Path path){
 		dimX=x;
 		dimY=y;
-		currentX=20; 
-		currentY=20;
+		currentX=0; 
+		currentY=5;
 		lastX=currentX; 
 		lastY=currentY; 
 		startX=currentX; 
@@ -49,15 +49,14 @@ public class Runner {
 		generateArena();
 		initStartCell();
 		blockUnviablePaths();
-		path.middlePath.add(new Path(startX*7, startY*7));
 	}
 	
 	/**
 	 * Generates arena for maze
 	 */
 	private void generateArena(){
-		for(int i=0;i<dimY-1;i++){
-			for(int j=0;j<dimX-1;j++){
+		for(int i=0;i<dimY;i++){
+			for(int j=0;j<dimX;j++){
 				maze[j][i]= new Maze(j, i);
 			}
 		}
@@ -67,9 +66,9 @@ public class Runner {
 	 * initialize first cell
 	 */
 	private void initStartCell(){
-		maze[currentX][currentY].setNorth(true);
+		maze[currentX][currentY].setNorth(false);
 		maze[currentX][currentY].setEast(true);
-		maze[currentX][currentY].setSouth(true);
+		maze[currentX][currentY].setSouth(false);
 		maze[currentX][currentY].setWest(false);
 		maze[currentX][currentY].setSelf(false);
 		
@@ -87,11 +86,11 @@ public class Runner {
 		/* Check if end of arena or path */
 		if(currentX==0) maze[currentX][currentY].setWest(false);
 		else if(!maze[currentX-1][currentY].self) maze[currentX][currentY].setWest(false);
-		if(currentX==dimX) maze[currentX][currentY].setEast(false);
+		if(currentX==dimX-1) maze[currentX][currentY].setEast(false);
 		else if(!maze[currentX+1][currentY].self) maze[currentX][currentY].setEast(false);
 		if(currentY==0) maze[currentX][currentY].setNorth(false);
 		else if(!maze[currentX][currentY-1].self) maze[currentX][currentY].setNorth(false);
-		if(currentY==dimY) maze[currentX][currentY].setSouth(false);
+		if(currentY==dimY-1) maze[currentX][currentY].setSouth(false);
 		else if(!maze[currentX][currentY+1].self) maze[currentX][currentY].setSouth(false);
 	}
 	
@@ -149,46 +148,44 @@ public class Runner {
 			}
 			
 			/* Add render objects */
-			for(int i = 0; i < path.middlePath.size(); i++){
-				if(path.checkIfRoad(currentX, currentY)) break;
+			int listSize = path.middlePath.size();
+			for(int i = 0; i <= listSize; i++){
 				if(path.middlePath.size()==i){
-					path.middlePath.add(new Path(currentX*7, currentY*7));
-					if(currentX-lastX > 0) path.middlePath.add(new Path(currentX*7-4, currentY*7, Path.Direction_t.UP));
-					else if(currentX-lastX < 0) path.middlePath.add(new Path(currentX*7+4, currentY*7, Path.Direction_t.UP));
-					else if(currentY-lastY > 0) path.middlePath.add(new Path(currentX*7, currentY*7-4, Path.Direction_t.SIDE));
-					else if(currentY-lastY < 0) path.middlePath.add(new Path(currentX*7, currentY*7+4, Path.Direction_t.SIDE));
+					path.middlePath.add(new Path(currentX*21, currentY*21));
+					if(currentX-lastX > 0) path.middlePath.add(new Path(currentX*21-12, currentY*21));
+					else if(currentX-lastX < 0) path.middlePath.add(new Path(currentX*21+12, currentY*21));
+					else if(currentY-lastY > 0) path.middlePath.add(new Path(currentX*21, currentY*21-12));
+					else if(currentY-lastY < 0) path.middlePath.add(new Path(currentX*21, currentY*21+12));
 				}
 			}
 			
 			/* Make cell occupied: */
 			maze[currentX][currentY].setSelf(false);
 			
-			/* Block impossible paths: */
-			blockUnviablePaths();
-			
 			/* Set source cell: */
 			maze[currentX][currentY].setSourceLoc(lastX, lastY);
 //			System.out.println("B");
-			System.out.println(maze[currentX][currentY].sourceX + " " + maze[currentX][currentY].sourceY + " (" + lastX + " " + lastY +")" + "    " + currentX + " " + currentY + "    " + maze[currentX][currentY].getFreeCount());
+//			System.out.println(maze[currentX][currentY].sourceX + " " + maze[currentX][currentY].sourceY + " (" + lastX + " " + lastY +")" + "    " + currentX + " " + currentY + "    " + maze[currentX][currentY].getFreeCount());
 		}
 		/* Else if no viable paths, go back to source until viable cell can be occupied */
 		else{
 			currentX = mazeLoc.sourceX;
 			currentY = mazeLoc.sourceY;
-			System.out.println(maze[currentX][currentY].sourceX + " " + maze[currentX][currentY].sourceY + "    " + currentX + " " + currentY + "    " + maze[currentX][currentY].getFreeCount() + " <");
+//			System.out.println(maze[currentX][currentY].sourceX + " " + maze[currentX][currentY].sourceY + "    " + currentX + " " + currentY + "    " + maze[currentX][currentY].getFreeCount() + " <");
 		}
+		
+		/* Block impossible paths: */
+		blockUnviablePaths();
 //	System.out.println(maze[currentX][currentY].sourceX + " " + maze[currentX][currentY].sourceY + "    " + currentX + " " + currentY);
 	}
 	
 	public void paintsAPic(Graphics g){
 		g.setColor(Color.white);
-//		g.fillRect(20, 20, 6, 6);
-//		System.out.println(currentX + " " + currentY);
 		if(path.middlePath.size()==0) return;
 		for(int i = 0; i < path.middlePath.size(); i++){
-			if(path.middlePath.get(i).getDirection()==null) g.fillRect(path.middlePath.get(i).getX(), path.middlePath.get(i).getY(), 6, 6);
-			if(path.middlePath.get(i).getDirection()==Path.Direction_t.UP) g.fillRect(path.middlePath.get(i).getX(), path.middlePath.get(i).getY(), 1, 6);
-			if(path.middlePath.get(i).getDirection()==Path.Direction_t.SIDE) g.fillRect(path.middlePath.get(i).getX(), path.middlePath.get(i).getY(), 6, 1);
+			g.fillRect(path.middlePath.get(i).getX(), path.middlePath.get(i).getY(), 12, 12);
 		}
+		g.setColor(Color.red);
+		g.fillRect(currentX*21, currentY*21, 12, 12);
 	}
 }

@@ -11,13 +11,13 @@ public class ArenaFrame extends Canvas{
 	public ArenaFrame(int dimX, int dimY, MazeGen maze){
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		frame.setPreferredSize(new Dimension(dimX*7, dimY*7));
-		frame.setMaximumSize(new Dimension(dimX*7, dimY*7));
-		frame.setMinimumSize(new Dimension(dimX*7, dimY*7));
+		frame.setPreferredSize(new Dimension(dimX*39, dimY*39));
+		frame.setMaximumSize(new Dimension(dimX*45, dimY*45));
+		frame.setMinimumSize(new Dimension(dimX*33, dimY*33));
 		
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
-		frame.setResizable(false);
+		frame.setResizable(true);
 		
 		frame.add(maze);
 		maze.start();

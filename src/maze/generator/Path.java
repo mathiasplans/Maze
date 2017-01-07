@@ -15,18 +15,6 @@ public class Path {
 		this.y = y;
 	}
 	
-	public Path(int x, int y, Direction_t direction){
-		this.x = x;
-		this.y = y;
-		this.direction = direction;
-	}
-	
-	public enum Direction_t{
-		SIDE,
-		UP
-	}
-
-	private Direction_t direction = null;
 	LinkedList<Path> middlePath;
 	
 	public boolean checkIfRoad(int checkX, int checkY){
@@ -36,10 +24,6 @@ public class Path {
 			if(this.middlePath.get(i).x == checkX && this.middlePath.get(i).y == checkY) return true;
 		}
 		return false;
-	}
-	
-	public Direction_t getDirection(){
-		return direction;
 	}
 	
 	public int getX(){
