@@ -3,16 +3,23 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Random;
 
+/**
+ * Runner class
+ * Responsible for generating the maze and creating render objects
+ * 
+ * @author Mathias
+ *
+ */
 public class Runner {
 	
 	private int dimX,
 		dimY,
-		currentX=dimX/2, 
-		currentY=dimY, 
-		lastX=currentX, 
-		lastY=currentY, 
-		startX=currentX, 
-		startY=currentY,
+		currentX, 
+		currentY, 
+		lastX, 
+		lastY, 
+		startX, 
+		startY,
 		tempRand=0;
 
 	Maze[][] maze;
@@ -39,6 +46,8 @@ public class Runner {
 		
 		maze = new Maze[dimX][dimY];
 		this.path = path;
+		
+		arenaInit();
 	}
 	
 	/**
@@ -48,7 +57,6 @@ public class Runner {
 	public void arenaInit(){
 		generateArena();
 		initStartCell();
-		blockUnviablePaths();
 	}
 	
 	/**
@@ -57,7 +65,7 @@ public class Runner {
 	private void generateArena(){
 		for(int i=0;i<dimY;i++){
 			for(int j=0;j<dimX;j++){
-				maze[j][i]= new Maze(j, i);
+				maze[j][i]= new Maze();
 			}
 		}
 	}
@@ -95,22 +103,9 @@ public class Runner {
 	}
 	
 	/**
-	 * @return	returns false if starting cell is fully occupied
-	 */
-	public boolean checkStartCell(){
-		if(!(maze[startX][startY].isCellUsable())) return true;
-		else return false;
-	}
-	
-	/**
 	 * moves the mazerunner
 	 */
 	public void takesAStep(){
-		if(isGenerated==false){ 
-			arenaInit();
-			this.isGenerated = true;
-		}
-		
 		Maze mazeLoc = maze[currentX][currentY];
 		
 		/* If there are viable cells next to current, move there */
@@ -120,72 +115,61 @@ public class Runner {
 			lastY = currentY;
 			
 			/* Move to a random place: */
-			int x = 200;
+			int x = 10000000;
 			tempRand=rand.nextInt(x);
 			
-			if(tempRand>(x*3)/4){
+			if(tempRand>=(x*3)/4){
 				if(mazeLoc.north) currentY--;
 				else if(mazeLoc.east) currentX++;
 				else if(mazeLoc.south) currentY++;
 				else if(mazeLoc.west) currentX--;
 				
-			}else if(tempRand>(x*2)/4){
+			}else if(tempRand>=(x*2)/4){
 				if(mazeLoc.west) currentX--;
 				else if(mazeLoc.north) currentY--;
 				else if(mazeLoc.east) currentX++;
 				else if(mazeLoc.south) currentY++; 
 				
-			}else if(tempRand>(x*1)/4){					
-				if(mazeLoc.east) currentX++; 
-				else if(mazeLoc.west) currentX--;
-				else if(mazeLoc.north) currentY--;
-				else if(mazeLoc.south) currentY++;
-			}else if(tempRand>=0){					
-				if(mazeLoc.south) currentY++; 
+			}else if(tempRand>=x/4){					
+				if(mazeLoc.south) currentY++;
 				else if(mazeLoc.west) currentX--;
 				else if(mazeLoc.north) currentY--;
 				else if(mazeLoc.east) currentX++;
+			}else if(tempRand>=0){					
+				if(mazeLoc.east) currentX++;
+				else if(mazeLoc.west) currentX--;
+				else if(mazeLoc.south) currentY++; 
+				else if(mazeLoc.north) currentY--;
 			}
 			
 			/* Add render objects */
-			int listSize = path.middlePath.size();
-			for(int i = 0; i <= listSize; i++){
-				if(path.middlePath.size()==i){
-					path.middlePath.add(new Path(currentX*21, currentY*21));
-					if(currentX-lastX > 0) path.middlePath.add(new Path(currentX*21-12, currentY*21));
-					else if(currentX-lastX < 0) path.middlePath.add(new Path(currentX*21+12, currentY*21));
-					else if(currentY-lastY > 0) path.middlePath.add(new Path(currentX*21, currentY*21-12));
-					else if(currentY-lastY < 0) path.middlePath.add(new Path(currentX*21, currentY*21+12));
-				}
-			}
-			
+			path.middlePath.add(new Path(currentX*21, currentY*21));			
+			path.middlePath.add(new Path(currentX*21-12*(currentX-lastX), currentY*21-12*(currentY-lastY)));
+					
 			/* Make cell occupied: */
 			maze[currentX][currentY].setSelf(false);
 			
 			/* Set source cell: */
 			maze[currentX][currentY].setSourceLoc(lastX, lastY);
-//			System.out.println("B");
-//			System.out.println(maze[currentX][currentY].sourceX + " " + maze[currentX][currentY].sourceY + " (" + lastX + " " + lastY +")" + "    " + currentX + " " + currentY + "    " + maze[currentX][currentY].getFreeCount());
-		}
+			}
 		/* Else if no viable paths, go back to source until viable cell can be occupied */
 		else{
-			currentX = mazeLoc.sourceX;
-			currentY = mazeLoc.sourceY;
-//			System.out.println(maze[currentX][currentY].sourceX + " " + maze[currentX][currentY].sourceY + "    " + currentX + " " + currentY + "    " + maze[currentX][currentY].getFreeCount() + " <");
+			currentX = mazeLoc.getSourceX();
+			currentY = mazeLoc.getSourceY();
 		}
 		
 		/* Block impossible paths: */
 		blockUnviablePaths();
-//	System.out.println(maze[currentX][currentY].sourceX + " " + maze[currentX][currentY].sourceY + "    " + currentX + " " + currentY);
 	}
 	
 	public void paintsAPic(Graphics g){
 		g.setColor(Color.white);
-		if(path.middlePath.size()==0) return;
 		for(int i = 0; i < path.middlePath.size(); i++){
 			g.fillRect(path.middlePath.get(i).getX(), path.middlePath.get(i).getY(), 12, 12);
 		}
 		g.setColor(Color.red);
 		g.fillRect(currentX*21, currentY*21, 12, 12);
+		g.setColor(Color.cyan);
+		g.fillRect(startX*21, startY*21, 12, 12);
 	}
 }

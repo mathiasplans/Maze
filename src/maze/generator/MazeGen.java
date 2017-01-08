@@ -4,6 +4,13 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
+/**
+ * MazeGen class
+ * Main class of the program, manages rendering and threads
+ * 
+ * @author Mathias
+ *
+ */
 public class MazeGen extends Canvas implements Runnable {
 
 	private static final long serialVersionUID = 1L;
@@ -19,7 +26,7 @@ public class MazeGen extends Canvas implements Runnable {
 		wonderer = new Path();
 	}
 	
-	private static int DIMX=75, DIMY=45;
+	private static int DIMX=47, DIMY=32;
 	private Thread thread;
 	private boolean running = false;
 	private Path wonderer = new Path();
@@ -29,12 +36,18 @@ public class MazeGen extends Canvas implements Runnable {
 		new MazeGen(DIMX, DIMY);
 	}
 	
+	/**
+	 * Start method for the main thread
+	 */
 	public synchronized void start(){
 		thread = new Thread(this);
 		thread.start();
 		running = true;
 	}
 	
+	/**
+	 * Stop method for the main thread
+	 */
 	public synchronized void stop(){
 		try{ 
 			thread.join();
@@ -44,6 +57,9 @@ public class MazeGen extends Canvas implements Runnable {
 		}
 	}
 	
+	/**
+	 * Run method for the main thread
+	 */
 	public void run(){
 		long lastTime = System.nanoTime();
 		double amountOfTicks = 60.0, ns = 1000000000 / amountOfTicks, delta = 0;
@@ -68,21 +84,27 @@ public class MazeGen extends Canvas implements Runnable {
 		}
 	}
 	
+	/**
+	 * Tick method for the main thread
+	 */
 	private void tick(){
 		mazeRunner.takesAStep();
 	}
 	
+	/**
+	 * Render method for the main thread
+	 */
 	private void render(){
 		BufferStrategy bs = this.getBufferStrategy();
 		if(bs == null){
-			this.createBufferStrategy(4);
+			this.createBufferStrategy(3);
 			return;
 		}
 		
 		Graphics g = bs.getDrawGraphics();
 		
 		g.setColor(Color.black);
-		g.fillRect(0, 0, DIMX*60, DIMY*60);
+		g.fillRect(0, 0, DIMX*100, DIMY*100);
 		
 		mazeRunner.paintsAPic(g);
 		
